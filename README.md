@@ -7,46 +7,39 @@
 [![DuckDB](https://img.shields.io/badge/DuckDB-Fast_Analytical_SQL-yellow.svg)](https://duckdb.org/)
 [![scikit-learn](https://img.shields.io/badge/Machine_Learning-scikit--learn-orange.svg)](https://scikit-learn.org/)
 
-## 🌪️ Executive Summary
-[cite_start]This project investigates two simultaneous, high-impact shifts in U.S. tornado activity over the last 75 years: the geographic migration away from the Central Plains toward the Southeast/Midwest, and the temporal shift toward a higher frequency of nocturnal touchdowns[cite: 4]. 
+## 1. Executive Summary
+This study investigates two simultaneous shifts in U.S. tornado activity over the last 75 years: the geographic migration from the Central Plains to the Southeast/Midwest, and the temporal shift toward a higher frequency of nocturnal touchdowns. By leveraging the NOAA Storm Events Database, this project seeks to quantify how these changes increase the vulnerability of local populations and challenge existing warning systems.
 
-[cite_start]By engineering a unified dataset from the NOAA Storm Events Database and integrating it with the CDC's Social Vulnerability Index (SVI)[cite: 5, 22, 23], this project moves beyond traditional historical weather tracking. [cite_start]It utilizes machine learning to forecast localized probability scores for nocturnal tornado occurrences, providing actionable risk-modeling for adjusting long-term disaster preparedness and building codes in emerging high-risk zones[cite: 34, 35].
+## 2. Problem Statement
+Traditional "Tornado Alley" (Oklahoma, Kansas, Texas) is synonymous with late-afternoon, spring-season storms. However, emerging data suggests a "New Alley" in the Southeast (Dixie Alley) where tornadoes are more frequent, often occur at night, and happen during the winter months. Because nighttime tornadoes are statistically more lethal, proving this "Nocturnal Creep" is a critical public safety objective.
 
-## 📊 Problem Statement
-[cite_start]Traditional "Tornado Alley" (Oklahoma, Kansas, Texas) has historically been synonymous with late-afternoon, spring-season storms[cite: 7]. [cite_start]However, emerging data indicates the formation of a "New Alley" in the Southeast where tornadoes are occurring more frequently, often during winter months, and crucially, at night[cite: 8]. [cite_start]Because nighttime tornadoes are statistically more lethal, quantifying and predicting this "Nocturnal Creep" is a critical public safety objective[cite: 9].
+## 3. Core Hypotheses
+* **Hypothesis 1 (Spatial):** The geographic centroid (center of gravity) of EF1+ tornadoes has shifted significantly Eastward and Northward since 1950.
+* **Hypothesis 2 (Temporal):** The percentage of tornadoes touching down during "nocturnal hours" (8:00 PM - 6:00 AM) has increased, particularly in the Southeast and Midwest.
+* **Hypothesis 3 (Impact):** The intersection of the spatial shift and the nocturnal shift occurs in regions with higher social vulnerability (as measured by the CDC SVI), leading to a higher risk of casualties.
 
-## 🔬 Core Hypotheses
-1. [cite_start]**Spatial Shift:** The geographic centroid (center of gravity) of EF1+ tornadoes has shifted significantly Eastward and Northward since 1950[cite: 13].
-2. [cite_start]**Temporal Shift:** The percentage of tornadoes touching down during "nocturnal hours" (8:00 PM - 6:00 AM) has increased, particularly in the Southeast and Midwest[cite: 14, 15].
-3. [cite_start]**Socioeconomic Impact:** The intersection of these spatial and temporal shifts occurs in regions with higher social vulnerability, leading to a compounded risk of casualties[cite: 16].
+## 4. Technical Stack & Data Engineering
+* **Languages:** SQL (DuckDB) for high-performance ETL; Python for spatial math and visualization.
+* **Data Sources:** 75 years of raw touchdown data from the NOAA NCEI Storm Events database, and county-level socioeconomic data from the CDC Social Vulnerability Index (SVI).
+* **The "Master Stitch":** Using DuckDB to aggregate 75+ individual CSV files into a unified analytical table.
+* **Filtering Bias:** Restricting analysis to EF1+ events to eliminate "reporting bias" from the modern smartphone era.
 
-## 🛠️ Technical Stack & Methodology
+## 5. Analytical Methodology
+* **Centroid Tracking:** Calculating annual mean latitude/longitude to visualize the migration path of "Tornado Alley".
+* **Local Time Normalization:** Converting UTC timestamps to local solar time based on touchdown coordinates to accurately identify "Nocturnal" vs. "Diurnal" events.
+* **Trend Validation:** Utilizing the Mann-Kendall Trend Test to confirm that the changes in time and space are statistically significant.
+* **Visualizations:** Decadal Heatmaps comparing touchdown density from 1950-1985 vs. 1990-2025. Polar "Clock" Plots showing the distribution of touchdown hours to highlight the increase in nighttime activity.
 
-### 1. Data Engineering (The "Master Stitch")
-* [cite_start]**Tool:** SQL (DuckDB) [cite: 18]
-* [cite_start]**Process:** Aggregated 75+ individual annual CSV files from the NOAA NCEI database into a unified, high-performance analytical table[cite: 22, 23]. 
-* [cite_start]**Quality Control:** Applied filters to restrict the analysis strictly to EF1+ events, effectively eliminating modern "reporting bias" introduced by the smartphone era[cite: 24].
+## 6. Predictive Forecasting (Machine Learning)
+* **Objective:** To develop a predictive model that forecasts the probability of nocturnal tornado occurrences.
+* **The Model:** Utilizing a Random Forest classifier to map localized future risk.
+* **Feature Engineering:** The model ingests normalized local solar time, rolling decadal geospatial centroids, and utilizes CDC SVI weights directly in the loss function to penalize algorithmic misses in highly vulnerable counties.
 
-### 2. Spatiotemporal Analysis
-* **Tool:** Python (Pandas, GeoPandas, SciPy)
-* [cite_start]**Process:** Converted UTC timestamps to local solar time based on exact touchdown coordinates to accurately classify "Nocturnal" vs. "Diurnal" events[cite: 28]. [cite_start]Calculated annual mean latitudes/longitudes to track the migration path [cite: 27][cite_start], and validated trends using the Mann-Kendall Trend Test[cite: 29].
-
-### 3. Predictive Forecasting (Machine Learning)
-* **Tool:** Python (scikit-learn)
-* **Process:** Developed a Random Forest classification model to forecast the localized probability of nocturnal EF1+ events. Engineered features include localized temporal indicators, rolling decadal geospatial centroids, and SVI weights to penalize algorithmic misses in highly vulnerable counties. 
+## 7. Significance & Impact
+For residents in states like Oklahoma, understanding this shift is vital for adjusting long-term disaster preparedness. This project moves beyond "weather tracking" into "risk modeling," providing a data-driven argument for updated building codes and improved nighttime alert systems in the newly high-risk zones of the Southeast.
 
 ## 📂 Repository Structure
 ```text
 ├── data/
 │   ├── raw/               # Raw NOAA and CDC CSV files
-│   └── processed/         # Cleaned DuckDB output tables
-├── notebooks/
-│   ├── 01_duckdb_etl.ipynb           # The Master Stitch data pipeline
-│   ├── 02_spatiotemporal_eda.ipynb   # Visualizing the migration & nocturnal creep
-│   └── 03_ml_forecasting.ipynb       # Random Forest predictive modeling
-├── src/
-│   ├── sql_queries/       # Modular SQL scripts
-│   └── utils.py           # Python helper functions (e.g., UTC to Solar Time)
-├── visual_outputs/        # Decadal heatmaps and polar clock plots
-├── requirements.txt       # Project dependencies
-└── README.md
+│   └── processed/         # Cleaned
