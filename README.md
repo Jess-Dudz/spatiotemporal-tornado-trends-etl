@@ -28,48 +28,60 @@ Processing 75 years of raw, compressed `.csv` files required a high-performance 
 A comparative analysis of the 1950-1985 baseline versus the modern 1990-2025 era reveals a clear expansion of tornado activity into the late-night and early-morning hours. 
 
 <div align="center">
-  <img src="visual_outputs/nocturnal_creep_clock_plot.jpg" alt="Polar Clock Plot showing Nocturnal Creep" width="600"/>
+  <img src="visual_outputs/nocturnal_creep_clock_plot.png" alt="Polar Clock Plot showing Nocturnal Creep" width="600"/>
   <br>
-  <i><b>Figure 1: The Nocturnal Creep.</b> A polar distribution of EF1+ tornadoes by Local Solar Hour. A comparative analysis reveals a clear temporal shift where modern tornado activity (red) is expanding into the late-night and early-morning hours compared to the 1950-1985 baseline (blue).</i>
+  <i><b>Figure 1: The Nocturnal Creep.</b> A polar distribution of EF1+ tornadoes by Local Solar Hour. Modern activity (red) shows a distinct expansion into the 9 PM - 9 AM window compared to the 1950-1985 baseline (blue).</i>
 </div>
 
 ### 2. The Great Migration (Geographic Shift)
-A non-parametric Mann-Kendall trend test confirmed a statistically significant Eastward shift ($p < 0.001$). To visualize this, decadal geospatial heatmaps were generated using `geopandas`.
+A non-parametric Mann-Kendall trend test confirmed a statistically significant Eastward shift ($p < 0.001$). 
 
 <div align="center">
-  <img src="visual_outputs/rf_feature_importance.png" alt="Random Forest Feature Importance" width="700"/>
+  <img src="visual_outputs/decadal_migration_heatmaps.png" alt="Decadal Heatmaps showing eastward migration" width="800"/>
   <br>
-  <i><b>Figure 3: Gini Feature Importance.</b> Extracted from the SMOTE-trained Random Forest Classifier. Latitude emerges as the dominant predictor of a nocturnal event, mathematically validating the physical threat of shorter winter days and proximity to Gulf moisture in the Southeast.</i>
+  <i><b>Figure 2: The Great Migration.</b> Decadal hexbin density maps. The center of gravity has visibly decoupled from the traditional Plains, establishing a new, highly active centroid in the American Southeast.</i>
 </div>
 
 ---
 
 ## 🤖 Phase 2: Predictive Machine Learning
 
-To transition from historical analysis to predictive forecasting, a **Random Forest Classifier** was built to predict the probability of a tornado occurring at night based strictly on its spatiotemporal coordinates (Latitude, Longitude, Month).
+### The Modeling Challenge: The Accuracy Trap
+The dataset presented a significant class imbalance: approximately 80% of tornado touchdowns occur during daylight hours. A baseline model would achieve high accuracy simply by predicting "Daytime" for every event, while completely failing to identify the high-risk nocturnal minority class.
 
-### Handling the Accuracy Trap
-Initial modeling yielded an 84% accuracy, but a dangerously low recall (0.24) for the minority class (Nocturnal). Standard spatial features alone are heavily biased toward the more frequent daytime storms.
+### Synthetic Minority Over-sampling Technique (SMOTE)
+To ensure the model could effectively identify nocturnal threats, **SMOTE** was utilized to balance the training set. By generating synthetic examples of the minority class, the model was forced to learn the specific spatiotemporal boundaries of nighttime storms rather than just following the majority distribution.
 
-### SMOTE Resampling & Results
-To optimize the model for disaster forecasting—where False Negatives are highly dangerous—**SMOTE (Synthetic Minority Over-sampling Technique)** was applied to the training data. 
-* **Result:** Minority Recall doubled from 24% to **51%**, allowing the model to successfully identify more than half of all nocturnal events using only location and season.
+
+
+| Metric | Baseline Model (Imbalanced) | SMOTE-Optimized Model |
+| :--- | :--- | :--- |
+| **Nocturnal Recall** | 24% | **51%** |
+| **Accuracy** | 84% | 76% |
+| **F1-Score (Nocturnal)** | 0.35 | **0.48** |
+
+> **Strategic Trade-off:** While overall accuracy decreased, **Recall for the nocturnal class doubled**. In disaster forecasting, a False Negative (missing a nighttime storm) is significantly more dangerous than a False Positive.
 
 ### Inside the Black Box: Feature Importance
 <div align="center">
   <img src="visual_outputs/rf_feature_importance.png" alt="Random Forest Feature Importance" width="700"/>
   <br>
-  <i>Figure 3: Gini Importance extracted from the SMOTE-trained Random Forest.</i>
+  <i><b>Figure 3: Gini Feature Importance.</b> Extracted from the SMOTE-trained Random Forest Classifier.</i>
 </div>
 
-**Key Finding:** `BEGIN_LAT` (Latitude) emerged as the dominant predictor of a nocturnal event. This mathematically validates the physical reality of the threat: lower latitudes (the Southeast/Dixie Alley) have shorter winter days and closer proximity to the Gulf of Mexico's low-level moisture jet, creating the perfect engine for off-hour severe weather.
+**Key Finding:** `BEGIN_LAT` (Latitude) emerged as the dominant predictor of a nocturnal event. This mathematically validates the physical reality of the threat: lower latitudes (the Southeast/Dixie Alley) have shorter winter days and closer proximity to the Gulf of Mexico's moisture source.
 
 ---
 
 ## 🚀 Conclusion
-This analysis proves that the definition of "Tornado Alley" is no longer static. As activity pushes further South and East, it encounters areas with higher population densities, more mobile homes, and greater tree cover—all while striking increasingly under the cover of darkness. 
+This analysis proves that the definition of "Tornado Alley" is no longer static. As activity pushes further South and East, it strikes increasingly under the cover of darkness in areas with higher population densities.
 
 **Repository Structure:**
-* `01_duckdb_etl.ipynb`: Data ingestion, SQL cleaning, and database generation.
-* `02_spatiotemporal_eda.ipynb`: Feature engineering, Mann-Kendall testing, and geospatial mapping.
-* `03_ml_forecasting.ipynb`: Predictive modeling, SMOTE resampling, and feature extraction.
+* `notebooks/`: End-to-end Python pipeline (ETL, EDA, and ML).
+* `visual_outputs/`: High-resolution geospatial and temporal visualizations.
+* `data/`: Processed DuckDB database.
+
+---
+
+## 🎓 About the Project
+This analysis was developed as a capstone portfolio piece for my Master of Science in Data Science (MSDS) journey. It was designed to showcase end-to-end data architecture, spatiotemporal feature engineering, and the deployment of machine learning on imbalanced datasets.
