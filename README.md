@@ -1,87 +1,144 @@
-# 🌪️ The Great Migration & The Nocturnal Creep
-**A Spatiotemporal Machine Learning Analysis of U.S. Tornado Shifts (1950–2025)**
+# 🌪️ Tornado Risk Intelligence Dashboard
 
-![Python](https://img.shields.io/badge/Python-3.13-blue)
-![DuckDB](https://img.shields.io/badge/Database-DuckDB-yellow)
-![Machine Learning](https://img.shields.io/badge/ML-Random_Forest-lightgrey)
-![Status](https://img.shields.io/badge/Status-Complete-success)
+An interactive data science application that analyzes tornado risk across the United States using a dynamic scoring model.
 
-## 📌 Executive Summary
-Over the last 75 years, the behavior of severe weather in the United States has fundamentally changed. This project ingests and analyzes historical NOAA data to investigate two dangerous spatiotemporal phenomena:
-1. **The Great Migration:** A geographic shift of tornado density away from the traditional Central Plains (e.g., Oklahoma, Kansas) and into the Southeast (Dixie Alley).
-2. **The Nocturnal Creep:** An increasing frequency of nighttime and early-morning touchdowns, which disproportionately impact vulnerable populations.
-
-By engineering local solar time features and deploying a SMOTE-enhanced Random Forest Classifier, this project successfully models the geographic and seasonal parameters driving nocturnal tornado risk.
+🔗 **Live App:**
+https://spatiotemporal-tornado-trends-etl-33lzqces6fp8zwndje4ch6.streamlit.app/
 
 ---
 
-## 🏗️ Data Architecture & Engineering
-Processing 75 years of raw, compressed `.csv` files required a high-performance ETL pipeline. 
-* **Engine:** DuckDB was utilized to bypass pandas memory constraints, allowing for lightning-fast SQL aggregations across 43,236 distinct EF1+ tornado records.
-* **Feature Engineering:** Raw UTC timestamps were converted to **Local Solar Time** using high-precision longitude offsets. This ensured that "Nocturnal" was accurately defined by actual daylight conditions at the specific touchdown location, rather than a flat time zone standard.
+## 📊 Overview
+
+This project transforms historical tornado data into an interactive **risk intelligence system**.
+
+It allows users to:
+
+* Identify high-risk locations and time windows
+* Compare frequency vs severity of tornado events
+* Explore how risk changes across geography and time
+* Analyze confidence based on sample size
 
 ---
 
-## 📊 Phase 1: Exploratory Spatial Data Analysis (ESDA)
+## 🧠 Key Insights
 
-### 1. The Nocturnal Creep (Temporal Shift)
-A comparative analysis of the 1950-1985 baseline versus the modern 1990-2025 era reveals a clear expansion of tornado activity into the late-night and early-morning hours. 
+### 🌍 The Great Migration
 
-<div align="center">
-  <img src="visual_outputs/nocturnal_creep_clock_plot.png" alt="Polar Clock Plot showing Nocturnal Creep" width="600"/>
-  <br>
-  <i><b>Figure 1: The Nocturnal Creep.</b> A polar distribution of EF1+ tornadoes by Local Solar Hour. Modern activity (red) shows a distinct expansion into the 9 PM - 9 AM window compared to the 1950-1985 baseline (blue).</i>
-</div>
+Tornado activity has shifted eastward from the traditional Central Plains toward the Southeast ("Dixie Alley"), increasing exposure in more densely populated regions.
 
-### 2. The Great Migration (Geographic Shift)
-A non-parametric Mann-Kendall trend test confirmed a statistically significant Eastward shift ($p < 0.001$). 
+### 🌙 The Nocturnal Creep
 
-<div align="center">
-  <img src="visual_outputs/decadal_migration_heatmaps.png" alt="Decadal Heatmaps showing eastward migration" width="800"/>
-  <br>
-  <i><b>Figure 2: The Great Migration.</b> Decadal hexbin density maps. The center of gravity has visibly decoupled from the traditional Plains, establishing a new, highly active centroid in the American Southeast.</i>
-</div>
+Tornadoes are increasingly occurring at night, when detection and response are more difficult, increasing overall risk.
 
 ---
 
-## 🤖 Phase 2: Predictive Machine Learning
+## 🧠 Risk Model
 
-### The Modeling Challenge: The Accuracy Trap
-The dataset presented a significant class imbalance: approximately 80% of tornado touchdowns occur during daylight hours. A baseline model would achieve high accuracy simply by predicting "Daytime" for every event, while completely failing to identify the high-risk nocturnal minority class.
+The dashboard includes a dynamic risk model combining:
 
-### Synthetic Minority Over-sampling Technique (SMOTE)
-To ensure the model could effectively identify nocturnal threats, **SMOTE** was utilized to balance the training set. By generating synthetic examples of the minority class, the model was forced to learn the specific spatiotemporal boundaries of nighttime storms rather than just following the majority distribution.
+* **Frequency** → number of tornadoes
+* **Severity** → injuries per tornado
 
+Risk Score = (Severity × weight) + (Frequency × (1 - weight))
 
-
-| Metric | Baseline Model (Imbalanced) | SMOTE-Optimized Model |
-| :--- | :--- | :--- |
-| **Nocturnal Recall** | 24% | **51%** |
-| **Accuracy** | 84% | 76% |
-| **F1-Score (Nocturnal)** | 0.35 | **0.48** |
-
-> **Strategic Trade-off:** While overall accuracy decreased, **Recall for the nocturnal class doubled**. In disaster forecasting, a False Negative (missing a nighttime storm) is significantly more dangerous than a False Positive.
-
-### Inside the Black Box: Feature Importance
-<div align="center">
-  <img src="visual_outputs/rf_feature_importance.png" alt="Random Forest Feature Importance" width="700"/>
-  <br>
-  <i><b>Figure 3: Gini Feature Importance.</b> Extracted from the SMOTE-trained Random Forest Classifier.</i>
-</div>
-
-**Key Finding:** `BEGIN_LAT` (Latitude) emerged as the dominant predictor of a nocturnal event. This mathematically validates the physical reality of the threat: lower latitudes (the Southeast/Dixie Alley) have shorter winter days and closer proximity to the Gulf of Mexico's moisture source.
+Users can adjust the weighting to explore different definitions of risk.
 
 ---
 
-## 🚀 Conclusion
-This analysis proves that the definition of "Tornado Alley" is no longer static. As activity pushes further South and East, it strikes increasingly under the cover of darkness in areas with higher population densities.
+## 🚀 Features
 
-**Repository Structure:**
-* `notebooks/`: End-to-end Python pipeline (ETL, EDA, and ML).
-* `visual_outputs/`: High-resolution geospatial and temporal visualizations.
-* `data/`: Processed DuckDB database.
+* Interactive filtering (state, year, time of day)
+* Trend analysis over time
+* Day vs night comparisons
+* High-impact tornado classification
+* State-level composite risk rankings
+* Time + place risk modeling
+* Confidence scoring (sample size awareness)
+* Downloadable insights
+* Optional geographic heatmap
 
 ---
 
-## 🎓 About the Project
-This analysis was developed as a capstone portfolio piece for my Master of Science in Data Science (MSDS) journey. It was designed to showcase end-to-end data architecture, spatiotemporal feature engineering, and the deployment of machine learning on imbalanced datasets.
+## ⚙️ Tech Stack
+
+* Python
+* Streamlit
+* DuckDB
+* Pandas
+* PyDeck
+
+---
+
+## 🔬 Machine Learning Analysis (Research Layer)
+
+This project also includes a deeper modeling pipeline exploring nocturnal tornado prediction.
+
+### Problem
+
+Tornado events are highly imbalanced:
+
+* ~80% occur during daytime
+* Nighttime events are rarer but more dangerous
+
+### Solution
+
+A SMOTE-enhanced Random Forest model was used to improve detection of nocturnal events.
+
+### Results
+
+| Metric           | Baseline | SMOTE Model |
+| ---------------- | -------- | ----------- |
+| Nocturnal Recall | 24%      | 51%         |
+| Accuracy         | 84%      | 76%         |
+| F1 Score         | 0.35     | 0.48        |
+
+### Key Finding
+
+Latitude emerged as the strongest predictor of nocturnal tornado risk, reinforcing the increased vulnerability of the Southeast.
+
+---
+
+## 🏗️ Data Engineering
+
+* DuckDB used for high-performance querying
+* 43,000+ EF1+ tornado records analyzed
+* Local solar time engineered from longitude offsets
+* Efficient ETL pipeline for large historical datasets
+
+---
+
+## 📁 Project Structure
+
+app.py
+tornado_database.duckdb
+requirements.txt
+README.md
+notebooks/
+visual_outputs/
+
+---
+
+## 🚀 How to Run Locally
+
+pip install -r requirements.txt
+streamlit run app.py
+
+---
+
+## 💡 Why This Project Matters
+
+This project demonstrates:
+
+* End-to-end data pipeline development
+* Spatiotemporal feature engineering
+* Risk modeling and normalization
+* Handling imbalanced datasets
+* Model interpretability
+* Deployment of interactive analytics tools
+
+---
+
+## 👤 Author
+
+Jessica Dudzinski
+
